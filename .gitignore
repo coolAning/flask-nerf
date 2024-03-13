@@ -20,3 +20,7 @@
 __pycache__
 .DS_Store
 imgui.ini
+data
+colmap_sparse
+colmap_text
+colmap.db
