@@ -24,3 +24,4 @@ data
 colmap_sparse
 colmap_text
 colmap.db
+static/screen_shot/*

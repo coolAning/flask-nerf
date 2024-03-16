@@ -1,10 +1,10 @@
-python scripts/colmap2nerf.py --video_in data/nerf/cup/cup.mp4 --video_fps 2 --run_colmap --aabb_scale 32 --out data\nerf\cup\transforms.json --overwrite
-
-python scripts/run.py --scene ./ --train --n_steps 1000 --save_snapshot data/nerf/cup/cup.ingp
+python scripts/run.py --scene ./data/nerf/1_cup --train --n_steps 1000 --save_snapshot data/nerf/1_cup/1_cup.ingp
 
 python scripts/run.py --load_snapshot data/nerf/fox/fox.ingp --screenshot_transforms data/nerf/fox/camera.json --screenshot_dir data/nerf/fox/screen_shot --screenshot_spp 1
 
 python scripts/run.py --scene data/nerf/fox --train --n_steps 1000 --save_snapshot data/nerf/fox/fox.ingp
+
+celery -A celery_app worker --pool=solo -l info
 
 # Instant Neural Graphics Primitives ![](https://github.com/NVlabs/instant-ngp/workflows/CI/badge.svg)
 

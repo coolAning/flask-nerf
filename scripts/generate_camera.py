@@ -1,76 +1,163 @@
 import json
 import numpy as np
 
-# 读取JSON文件
-with open('data/nerf/fox/camera.json', 'r') as f:
-    data = json.load(f)
+class CameraTransformer:
+    def __init__(self, json_path):
+        self.json_path = json_path
+        with open(json_path, 'r') as f:
+            self.data = json.load(f)
+        self.matrix = np.array(self.data['frames'][0]['transform_matrix'])
 
-# 获取第一个frame的transform_matrix
-matrix = np.array(data['frames'][0]['transform_matrix'])
+    # def get_translation_matrix(self, direction, distance=0.1):
+    #     if direction == 'd':
+    #         translation = np.array([0, distance, 0])
+    #     elif direction == 'a':
+    #         translation = np.array([0, -distance, 0])
+    #     elif direction == 'w':
+    #         translation = np.array([-distance, 0, 0])
+    #     elif direction == 's':
+    #         translation = np.array([distance, 0, 0])
+    #     elif direction == 'up':
+    #         translation = np.array([0, 0, distance])
+    #     elif direction == 'down':
+    #         translation = np.array([0, 0, -distance])
+    #     else:
+    #         raise ValueError(f"Unknown direction: {direction}")
 
-# 定义一个函数，根据方向生成一个平移矩阵
-def get_translation_matrix(direction, distance=0.1):
-    if direction == 'up':
-        translation = np.array([0, distance, 0])
-    elif direction == 'down':
-        translation = np.array([0, -distance, 0])
-    elif direction == 'left':
-        translation = np.array([-distance, 0, 0])
-    elif direction == 'right':
-        translation = np.array([distance, 0, 0])
-    elif direction == 'forward':
-        translation = np.array([0, 0, distance])
-    elif direction == 'backward':
-        translation = np.array([0, 0, -distance])
-    else:
-        raise ValueError(f"Unknown direction: {direction}")
+    #     translation_matrix = np.eye(4)
+    #     translation_matrix[:3, 3] = translation
+    #     return translation_matrix
+    def get_translation_matrix(self, direction, distance=0.1):
+        if direction == 'd':
+            translation = np.array([distance, 0, 0])
+        elif direction == 'a':
+            translation = np.array([-distance, 0, 0])
+        elif direction == 'w':
+            translation = np.array([0, 0, -distance])
+        elif direction == 's':
+            translation = np.array([0, 0, distance])
+        elif direction == 'up':
+            translation = np.array([0, distance, 0])
+        elif direction == 'down':
+            translation = np.array([0, -distance, 0])
+        else:
+            raise ValueError(f"Unknown direction: {direction}")
+        # 将平移向量旋转到相机的局部坐标系
+        rotation_matrix = self.matrix[:3, :3]
+        translation = np.dot(rotation_matrix, translation)
 
-    translation_matrix = np.eye(4)
-    translation_matrix[:3, 3] = translation
-    return translation_matrix
+        translation_matrix = np.eye(4)
+        translation_matrix[:3, 3] = translation
+        return translation_matrix
 
-# 定义一个函数，根据欧拉角生成一个旋转矩阵
-def get_rotation_matrix(pitch, yaw, roll):
-    pitch = np.radians(pitch)
-    yaw = np.radians(yaw)
-    roll = np.radians(roll)
+    def get_rotation_matrix(self, pitch, yaw, roll):
+        pitch = np.radians(pitch)
+        yaw = np.radians(yaw)
+        roll = np.radians(roll)
 
-    rotation_x = np.array([[1, 0, 0],
-                           [0, np.cos(pitch), -np.sin(pitch)],
-                           [0, np.sin(pitch), np.cos(pitch)]])
-    rotation_y = np.array([[np.cos(yaw), 0, np.sin(yaw)],
-                           [0, 1, 0],
-                           [-np.sin(yaw), 0, np.cos(yaw)]])
-    rotation_z = np.array([[np.cos(roll), -np.sin(roll), 0],
-                           [np.sin(roll), np.cos(roll), 0],
-                           [0, 0, 1]])
+        rotation_x = np.array([[1, 0, 0],
+                               [0, np.cos(pitch), -np.sin(pitch)],
+                               [0, np.sin(pitch), np.cos(pitch)]])
+        rotation_y = np.array([[np.cos(yaw), 0, np.sin(yaw)],
+                               [0, 1, 0],
+                               [-np.sin(yaw), 0, np.cos(yaw)]])
+        rotation_z = np.array([[np.cos(roll), -np.sin(roll), 0],
+                               [np.sin(roll), np.cos(roll), 0],
+                               [0, 0, 1]])
 
-    rotation = np.dot(rotation_z, np.dot(rotation_y, rotation_x))
+        rotation = np.dot(rotation_z, np.dot(rotation_y, rotation_x))
 
-    rotation_matrix = np.eye(4)
-    rotation_matrix[:3, :3] = rotation
-    return rotation_matrix
+        rotation_matrix = np.eye(4)
+        rotation_matrix[:3, :3] = rotation
+        return rotation_matrix
 
-# 定义一个函数，根据平移和旋转的需求更新矩阵
-def update_matrix(matrix, translation=None, rotation=None):
-    if translation is not None:
-        direction, distance = translation
-        translation_matrix = get_translation_matrix(direction, distance)
-        matrix = np.dot(translation_matrix, matrix)
 
-    if rotation is not None:
-        pitch, yaw, roll = rotation
-        rotation_matrix = get_rotation_matrix(pitch, yaw, roll)
-        matrix = np.dot(rotation_matrix, matrix)
+        
 
-    return matrix
+    # def update_matrix(self, translation=None, rotation=None):
+    #     if translation is not None:
+    #         direction, distance = translation
+    #         translation_matrix = self.get_translation_matrix(direction, distance)
+    #         self.matrix = np.dot(translation_matrix, self.matrix)
 
-# 更新矩阵
-# new_matrix = update_matrix(matrix, translation=('up', 0.1), rotation=(-30, -20, 0))  #欧拉角：俯仰角 偏航角 翻滚角
-new_matrix = update_matrix(matrix, translation=('backward', 1))  #欧拉角：俯仰角 偏航角 翻滚角
-# 更新JSON数据
-data['frames'][0]['transform_matrix'] = new_matrix.tolist()
+    #         # 更新 x, y, z 的值
+    #         if direction == 'd':
+    #             self.data['y'] += distance
+    #         elif direction == 'a':
+    #             self.data['y'] -= distance
+    #         elif direction == 'w':
+    #             self.data['x'] -= distance
+    #         elif direction == 's':
+    #             self.data['x'] += distance
+    #         elif direction == 'up':
+    #             self.data['z'] += distance
+    #         elif direction == 'down':
+    #             self.data['z'] -= distance
 
-# 保存修改后的JSON文件
-with open('data/nerf/fox/camera.json', 'w') as f:
-    json.dump(data, f, indent=2)
+    #     if rotation is not None:
+    #         pitch, yaw, roll = rotation
+    #         rotation_matrix = self.get_rotation_matrix(pitch, yaw, roll)
+    #         self.matrix = np.dot(rotation_matrix, self.matrix)
+
+    #         # 更新 pitch, yaw, roll 的值
+    #         self.data['pitch'] += pitch
+    #         self.data['yaw'] += yaw
+    #         self.data['roll'] += roll
+
+    #     return self.matrix
+    def update_matrix(self, translation=None, rotation=None):
+        if translation is not None:
+            direction, distance = translation
+            translation_matrix = self.get_translation_matrix(direction, distance)
+            self.matrix = np.dot(translation_matrix, self.matrix)
+
+            # 更新 x, y, z 的值
+            translation_vector = self.get_translation_vector(direction, distance)
+            self.data['x'] = round(self.data['x'] + translation_vector[0])
+            self.data['y'] = round(self.data['y'] + translation_vector[1])
+            self.data['z'] = round(self.data['z'] + translation_vector[2])
+
+        if rotation is not None:
+            pitch, yaw, roll = rotation
+            rotation_matrix = self.get_rotation_matrix(pitch, yaw, roll)
+            self.matrix = np.dot(rotation_matrix, self.matrix)
+
+            # 更新 pitch, yaw, roll 的值
+            self.data['pitch'] += pitch
+            self.data['yaw'] += yaw
+            self.data['roll'] += roll
+
+        return self.matrix
+    def get_translation_vector(self, direction, distance):
+        if direction == 'd':
+            translation = np.array([distance, 0, 0])
+        elif direction == 'a':
+            translation = np.array([-distance, 0, 0])
+        elif direction == 'w':
+            translation = np.array([0, 0, -distance])
+        elif direction == 's':
+            translation = np.array([0, 0, distance])
+        elif direction == 'up':
+            translation = np.array([0, distance, 0])
+        elif direction == 'down':
+            translation = np.array([0, -distance, 0])
+        else:
+            raise ValueError(f"Unknown direction: {direction}")
+
+        # 将平移向量转换到全局坐标系下
+        rotation_matrix = self.get_rotation_matrix(self.data['pitch'], self.data['yaw'], self.data['roll'])
+        translation = np.dot(rotation_matrix[:3, :3], translation)
+
+        return translation
+
+    def save(self):
+        x = str(self.data.get('x', ''))
+        y = str(self.data.get('y', ''))
+        z = str(self.data.get('z', ''))
+        pitch = str(self.data.get('pitch', ''))
+        yaw = str(self.data.get('yaw', ''))
+        roll = str(self.data.get('roll', ''))
+        self.data['frames'][0]['transform_matrix'] = self.matrix.tolist()
+        self.data['frames'][0]['file_path'] = '_'.join([x, y, z, pitch, yaw, roll]) + '.png'
+        with open(self.json_path, 'w') as f:
+            json.dump(self.data, f, indent=2)
