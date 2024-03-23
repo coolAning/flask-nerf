@@ -1,9 +1,41 @@
-commentjson
-imageio
-numpy
-opencv-python-headless
-pybind11
-pyquaternion
-scipy
-tqdm
-
+amqp==5.2.0
+billiard==4.2.0
+blinker @ file:///home/conda/feedstock_root/build_artifacts/blinker_1698890160476/work
+celery==5.3.6
+certifi==2024.2.2
+charset-normalizer==3.3.2
+click @ file:///D:/bld/click_1692312014553/work
+click-didyoumean==0.3.0
+click-plugins==1.1.1
+click-repl==0.3.0
+colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1666700638685/work
+commentjson==0.9.0
+Flask @ file:///home/conda/feedstock_root/build_artifacts/flask_1707043907952/work
+idna==3.6
+imageio==2.34.0
+importlib_metadata @ file:///home/conda/feedstock_root/build_artifacts/importlib-metadata_1709821103657/work
+itsdangerous @ file:///home/conda/feedstock_root/build_artifacts/itsdangerous_1648147185463/work
+Jinja2 @ file:///home/conda/feedstock_root/build_artifacts/jinja2_1704966972576/work
+kombu==5.3.5
+lark-parser==0.7.8
+MarkupSafe @ file:///D:/bld/markupsafe_1706900055959/work
+numpy==1.26.4
+opencv-python-headless==4.9.0.80
+pillow==10.2.0
+prompt-toolkit==3.0.43
+pybind11==2.11.1
+pyquaternion==0.9.9
+python-dateutil==2.9.0.post0
+redis==5.0.3
+requests==2.31.0
+scipy==1.12.0
+setuptools==69.1.1
+six==1.16.0
+tqdm==4.66.2
+tzdata==2024.1
+urllib3==2.2.1
+vine==5.1.0
+wcwidth==0.2.13
+Werkzeug @ file:///home/conda/feedstock_root/build_artifacts/werkzeug_1698235201373/work
+wheel==0.42.0
+zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1695255097490/work
