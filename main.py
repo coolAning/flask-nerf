@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 from flask import Flask, current_app, request
 import zipfile
@@ -131,6 +132,29 @@ def render():
     image_url = request.host_url + 'static/screen_shot/' + filename + '/' + f'{x}_{y}_{z}_{pitch}_{yaw}_{roll}.png'
     return jsonify({'message': 'render success', 'url': image_url}), 200
     
+# 删除模型数据
+@app.route('/delete', methods=['POST'])
+def delete():
+    
+    data = request.get_json()
+    filename = data.get('filename')
+    # 删除模型数据
+    model_dir = f"data/nerf/{filename}"
+    print(f"Deleting {model_dir}")
+    if os.path.exists(model_dir):
+        shutil.rmtree(model_dir)
+    else:
+        return jsonify({'message': 'delete failed, model not found'}), 400
+    # 删除截图
+    screenshot_dir = f"static/screen_shot/{filename}"
+    print(f"Deleting {screenshot_dir}")
+    if os.path.exists(screenshot_dir):
+        shutil.rmtree(screenshot_dir)
+    else:
+        return jsonify({'message': 'delete failed, model not found'}), 400
+        
+    return jsonify({'message': 'delete success'}), 200
+
 
 if __name__ == '__main__':
     app.run(port=5001,host='0.0.0.0')
