@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import time
 from flask import Flask, current_app, request
 import zipfile
 from celery_app import async_add, train
@@ -80,6 +81,9 @@ def upload():
 
 @app.route('/render', methods=['POST'])
 def render():
+    # 统计渲染时间
+    start_time = time.time()
+    
     data = request.get_json()
     origin = data.get('origin')
     filename = data.get('filename')
@@ -130,7 +134,74 @@ def render():
         subprocess.run(command)
 
     image_url = request.host_url + 'static/screen_shot/' + filename + '/' + f'{x}_{y}_{z}_{pitch}_{yaw}_{roll}.png'
+    
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"Execution time: {execution_time} seconds")
     return jsonify({'message': 'render success', 'url': image_url}), 200
+    
+    
+@app.route('/renderBatch', methods=['POST'])
+def renderBatch():
+    # 统计渲染时间
+    start_time = time.time()
+    
+    data = request.get_json()
+    origin = data.get('origin')
+    filename = data.get('filename')
+    if origin:
+        # 相机回到原点
+        # 读取 transforms.json 文件
+        with open(f'./data/nerf/{filename}/transforms.json', 'r') as f:
+            data = json.load(f)
+        with open(f'./data/nerf/{filename}/camera.json', 'r') as f:
+            new_data = json.load(f)
+        new_data['frames'] = [data['frames'][0]]
+        new_data['x'] = 0
+        new_data['y'] = 0
+        new_data['z'] = 0
+        new_data['pitch'] = 0
+        new_data['yaw'] = 0
+        new_data['roll'] = 0
+        new_data['frames'][0]['file_path'] = '0_0_0_0_0_0.png'
+        # 将新的数据写入 camera.json 文件
+        with open(f'./data/nerf/{filename}/camera.json', 'w') as f:
+            json.dump(new_data, f, indent=2)
+    else:
+        
+        # 调整相机位姿
+        translation = data.get('translation')
+        rotation = data.get('rotation')
+        transformer = CameraTransformer(f'data/nerf/{filename}/camera.json')
+        transformer.update_matrix(translation=translation, rotation=rotation)
+        transformer.save()
+    
+    # 检查 screen_shot 目录是否存在，如果不存在则创建它
+    # screenshot_dir = f'data/nerf/{filename}/screen_shot'
+    screenshot_dir = f'static/screen_shot/{filename}'
+    if not os.path.exists(screenshot_dir):
+        os.makedirs(screenshot_dir)
+        
+    with open(f'./data/nerf/{filename}/camera.json', 'r') as f:
+            new_data = json.load(f)
+    x = new_data['x']
+    y = new_data['y']
+    z = new_data['z']
+    pitch = new_data['pitch']
+    yaw = new_data['yaw']
+    roll = new_data['roll']
+    if not os.path.exists(f'{screenshot_dir}/{x}_{y}_{z}_{pitch}_{yaw}_{roll}.png'):
+        # 在命令行运行命令
+        command = ["python", "scripts/run.py", "--load_snapshot", f"data/nerf/{filename}/{filename}.ingp", "--screenshot_transforms", f"data/nerf/{filename}/camera.json", "--screenshot_dir", screenshot_dir, "--screenshot_spp", "1"]
+        subprocess.run(command)
+
+    image_url = request.host_url + 'static/screen_shot/' + filename + '/' + f'{x}_{y}_{z}_{pitch}_{yaw}_{roll}.png'
+    
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"Execution time: {execution_time} seconds")
+    return jsonify({'message': 'render success', 'url': image_url}), 200
+    
     
 # 删除模型数据
 @app.route('/delete', methods=['POST'])

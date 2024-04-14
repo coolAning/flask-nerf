@@ -45,7 +45,7 @@ class CameraTransformer:
         # 将平移向量旋转到相机的局部坐标系
         rotation_matrix = self.matrix[:3, :3]
         translation = np.dot(rotation_matrix, translation)
-
+        # translation = np.dot(np.linalg.inv(rotation_matrix), translation)
         translation_matrix = np.eye(4)
         translation_matrix[:3, 3] = translation
         return translation_matrix
@@ -121,6 +121,7 @@ class CameraTransformer:
             pitch, yaw, roll = rotation
             rotation_matrix = self.get_rotation_matrix(pitch, yaw, roll)
             self.matrix = np.dot(rotation_matrix, self.matrix)
+            # self.matrix = np.dot(self.matrix, rotation_matrix)
 
             # 更新 pitch, yaw, roll 的值
             self.data['pitch'] += pitch
