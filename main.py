@@ -87,6 +87,7 @@ def render():
     data = request.get_json()
     origin = data.get('origin')
     filename = data.get('filename')
+    picture_quality = data.get('picture_quality')
     if origin:
         # 相机回到原点
         # 读取 transforms.json 文件
@@ -130,7 +131,7 @@ def render():
     roll = new_data['roll']
     if not os.path.exists(f'{screenshot_dir}/{x}_{y}_{z}_{pitch}_{yaw}_{roll}.png'):
         # 在命令行运行命令
-        command = ["python", "scripts/run.py", "--load_snapshot", f"data/nerf/{filename}/{filename}.ingp", "--screenshot_transforms", f"data/nerf/{filename}/camera.json", "--screenshot_dir", screenshot_dir, "--screenshot_spp", "1"]
+        command = ["python", "scripts/run.py", "--load_snapshot", f"data/nerf/{filename}/{filename}.ingp", "--screenshot_transforms", f"data/nerf/{filename}/camera.json", "--screenshot_dir", screenshot_dir, "--screenshot_spp", str(picture_quality)]
         subprocess.run(command)
 
     image_url = request.host_url + 'static/screen_shot/' + filename + '/' + f'{x}_{y}_{z}_{pitch}_{yaw}_{roll}.png'
@@ -149,6 +150,7 @@ def renderBatch():
     data = request.get_json()
     origin = data.get('origin')
     filename = data.get('filename')
+    picture_quality = data.get('picture_quality')
     if origin:
         # 相机回到原点
         # 读取 transforms.json 文件
@@ -192,7 +194,7 @@ def renderBatch():
     roll = new_data['roll']
     if not os.path.exists(f'{screenshot_dir}/{x}_{y}_{z}_{pitch}_{yaw}_{roll}.png'):
         # 在命令行运行命令
-        command = ["python", "scripts/run.py", "--load_snapshot", f"data/nerf/{filename}/{filename}.ingp", "--screenshot_transforms", f"data/nerf/{filename}/camera.json", "--screenshot_dir", screenshot_dir, "--screenshot_spp", "1"]
+        command = ["python", "scripts/run.py", "--load_snapshot", f"data/nerf/{filename}/{filename}.ingp", "--screenshot_transforms", f"data/nerf/{filename}/camera.json", "--screenshot_dir", screenshot_dir, "--screenshot_spp", str(picture_quality)]
         subprocess.run(command)
 
     image_url = request.host_url + 'static/screen_shot/' + filename + '/' + f'{x}_{y}_{z}_{pitch}_{yaw}_{roll}.png'

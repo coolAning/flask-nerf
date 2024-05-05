@@ -37,7 +37,7 @@ def train(self , name , n_steps):
     self.update_state(state='SUCCESS', meta={'current': 'Task completed'})
     
     task_id = self.request.id
-    url = 'http://118.202.10.58:5000/camera/complete'
+    url = 'http://118.202.10.154:5000/camera/complete'
     data = {'task_id': task_id}
     response = requests.post(url, json=data)
     
